@@ -1,6 +1,6 @@
-setwd('data/')
-data<-read.csv("clean_data.csv",header=TRUE,stringsAsFactors = FALSE)
 
+setwd('E:/Downloads')
+data<-read.csv("hotel_bookings.csv",header=TRUE,stringsAsFactors = FALSE)
 str(data)
 summary(data)
 
@@ -53,7 +53,7 @@ child_na<-function(x){
   for (i in 1:nrow(x)) {
     if (is.na(x$children[i])) {
       
-     cat("En la fila ",i," hay N.A. ","\n")
+      cat("En la fila ",i," hay N.A. ","\n")
     }
   }
 }
@@ -76,7 +76,7 @@ library(ggplot2)
 
 
 library(dplyr)
-################leadtime, dayswaitngi list, adr
+################leadtime, adr
 ggplot(data_sin_na, aes(x=is_repeated_guest,y = lead_time,fill=hotel)) +
   geom_boxplot()
 
@@ -264,8 +264,8 @@ clean_data1$con_niños <- ifelse(clean_data$children > 0, "Con Niños", "Sin Ni�
 clean_data1$con_bebés <- ifelse(clean_data$babies > 0, "Con Bebés", "Sin Bebés")
 
 clean_data1$categoria <- ifelse(clean_data$children > 0 & clean_data$babies > 0, "Con Niños y Bebés",
-                             ifelse(clean_data$children > 0 & clean_data$babies == 0, "Solo con Niños",
-                                    ifelse(clean_data$children == 0 & clean_data$babies > 0, "Solo con Bebés", "Sin Niños ni Bebés")))
+                                ifelse(clean_data$children > 0 & clean_data$babies == 0, "Solo con Niños",
+                                       ifelse(clean_data$children == 0 & clean_data$babies > 0, "Solo con Bebés", "Sin Niños ni Bebés")))
 
 # Crea el gráfico de barras
 ggplot(clean_data1, aes(x = categoria, fill = categoria)) +
@@ -315,6 +315,56 @@ ggplot(cancelaciones_por_mes, aes(x =arrival_date_month   , y = cancelaciones)) 
   labs(title = "Meses con más cancelaciones", x = "Meses", y = "Cancelaciones") +
   theme_minimal()
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+#extra 1:
+# Calcular la frecuencia de clientes recurrentes por hotel
+clientes_recurrentes <- clean_data %>%
+  group_by(hotel, is_repeated_guest) %>%
+  summarise(num_clientes = n()) %>%
+  mutate(is_repeated_guest = ifelse(is_repeated_guest == 1, "Sí", "No"))
+
+print(clientes_recurrentes)
+
+# Gráfico de barras apiladas de la frecuencia de clientes recurrentes por hotel
+ggplot(clientes_recurrentes, aes(x = hotel, y = num_clientes, fill = is_repeated_guest)) +
+  geom_bar(stat = "identity", position = "stack") +
+  labs(x = "Hotel", y = "Número de Clientes", fill = "Cliente Recurrente") +
+  ggtitle("Frecuencia de Clientes Recurrentes por Hotel") +
+  theme_minimal()
+
+
+
+
+
+
+
+
+#extra 2:
+# Calcular la frecuencia de cambios de habitación por hotel
+cambios_habitacion <- clean_data %>%
+  group_by(hotel) %>%
+  summarise(porcentaje_cambios = mean( as.numeric(assigned_room_type) != as.numeric(reserved_room_type)) * 100)
+
+print(cambios_habitacion)
+
+# Gráfico de barras del porcentaje de cambios de habitación respecto a la reserva por hotel
+ggplot(cambios_habitacion, aes(x = hotel, y = porcentaje_cambios)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  labs(x = "Hotel", y = "Porcentaje de Cambios de Habitación (%)") +
+  ggtitle("Frecuencia de Cambios de Habitación respecto a la Reserva por Hotel") +
+  theme_minimal()
 
 
 
